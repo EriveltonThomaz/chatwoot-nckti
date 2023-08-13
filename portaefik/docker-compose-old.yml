@@ -1,0 +1,68 @@
+version: "3"
+
+services:
+  proxy:
+    image: traefik:v3.0
+    container_name: "traefik"
+    networks:
+      - traefik
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+    volumes:
+      - ./letsencrypt:/letsencrypt
+      # - ./users.u:/users/users.u
+      - ./users.u:/data/portaefik/portainer-data/users.u
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+    command:
+      #- "--log.level=DEBUG"
+      # Docker configuration
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=traefik"
+      # Configure entrypoint
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # SSL configuration
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencryptresolver.acme.httpchallenge.entrypoint=web"
+      #- "--certificatesresolvers.letsencryptresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.letsencryptresolver.acme.email=hostingerfelipe@gmail.com"
+      - "--certificatesresolvers.letsencryptresolver.acme.storage=/letsencrypt/acme.json"
+      # Global HTTP -> HTTPS
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      # Enable dashboard
+      - "--api.dashboard=true"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
+      - "traefik.http.routers.dashboard.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.middlewares=dashboard-auth"
+      # - "traefik.http.middlewares.dashboard-auth.basicauth.usersfile=/users/users.u"
+      - "traefik.http.middlewares.dashboard-auth.basicauth.usersfile=/data/portaefik/portainer-data/users.u"
+      - "traefik.http.routers.dashboard.rule=Host(`wtp1.nckti.com.br`)"
+      - "traefik.http.services.dashboard.loadbalancer.server.port=8080"
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: "portainer"
+    networks:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.rule=Host(`wtp.nckti.com.br`)"
+      - "traefik.http.routers.portainer.entrypoints=websecure"
+      - "traefik.http.routers.portainer.tls.certresolver=letsencryptresolver"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /data/portaefik/portainer-data:/data
+    restart: unless-stopped
+
+networks:
+  traefik:
+    external:
+      name: traefik

@@ -1,0 +1,42 @@
+# Dynamic configuration
+http:
+  middlewares:
+    secureHeaders:
+      headers:
+        sslRedirect: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
+    user-auth:
+      basicAuth:
+        users:
+          - "deploy:$apr1$IFTWmrOO$VQYxzia9/saJHOPBVjxiK."
+    #routers:
+      #rport-chatwoot-rtr:
+        #rule: "Host(`wtp.nckti.com.br`)"
+          #entryPoints:
+            #- web
+        #service: rport-chatwoot-svc
+        #tls: true
+    #services:
+        #rport-chatwoot-svc:
+          #loadBalancer:
+            #serversTransport: rport_trans
+            #servers:
+              #- url: "http://172.18.0.2:3000"
+    #serversTransports:
+      #rport_trans:
+        #insecureSkipVerify: true
+
+tls:
+  options:
+    default:
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305
+      minVersion: VersionTLS12
