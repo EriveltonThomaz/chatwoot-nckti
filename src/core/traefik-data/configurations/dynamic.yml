@@ -12,23 +12,6 @@ http:
       basicAuth:
         users:
           - "deploy:$apr1$IFTWmrOO$VQYxzia9/saJHOPBVjxiK."
-    #routers:
-      #rport-chatwoot-rtr:
-        #rule: "Host(`wtp.nckti.com.br`)"
-          #entryPoints:
-            #- web
-        #service: rport-chatwoot-svc
-        #tls: true
-    #services:
-        #rport-chatwoot-svc:
-          #loadBalancer:
-            #serversTransport: rport_trans
-            #servers:
-              #- url: "http://172.18.0.2:3000"
-    #serversTransports:
-      #rport_trans:
-        #insecureSkipVerify: true
-
 tls:
   options:
     default:
